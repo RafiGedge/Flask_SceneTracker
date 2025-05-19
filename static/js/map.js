@@ -3,33 +3,33 @@
 // Define custom icons for each object type
 const objectIcons = {
     Ground: {
-        icon: '🚶', // Person/unit icon
-        color: '#2E8B57', // Sea green
+        icon: '🪖', // Person/unit icon
+        color: '#FFFFFF', // Sea green
         size: [30, 30]
     },
     Shooting: {
-        icon: '🎯', // Target/shooting icon
-        color: '#DC143C', // Crimson red
+        icon: '🚀', // Target/shooting icon
+        color: '#FFFFFF', // Crimson red
         size: [25, 25]
     },
     EnemySpot: {
-        icon: '👁️', // Eye icon for observation
-        color: '#FF8C00', // Dark orange
+        icon: '☠️', // Eye icon for observation
+        color: '#FFFFFF', // Dark orange
         size: [28, 28]
     },
     Report: {
         icon: '📋', // Clipboard/report icon
-        color: '#4169E1', // Royal blue
+        color: '#FFFFFF', // Royal blue
         size: [26, 26]
     },
     Targets: {
-        icon: '🎯', // Target icon
-        color: '#FF1493', // Deep pink
+        icon: '🚩', // Target icon
+        color: '#FFFFFF', // Deep pink
         size: [24, 24]
     },
     EnemyInfrastructure: {
-        icon: '🏗️', // Building/infrastructure icon
-        color: '#8B4513', // Saddle brown
+        icon: '🏴‍☠️', // Building/infrastructure icon
+        color: '#FFFFFF', // Saddle brown
         size: [32, 32]
     }
 };
