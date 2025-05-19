@@ -1,16 +1,16 @@
 // Main application entry point
 
 // Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     // Initialize globals
     initializeApp();
-
+    
     // Setup event listeners
     document.getElementById('timeline-slider').addEventListener('input', updateTimeline);
-
+    
     // Setup object type tabs
     setupObjectTypeTabs();
-
+    
     // Make functions available globally
     window.createNewScene = createNewScene;
     window.initializeScene = initializeScene;
@@ -26,8 +26,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addFrame = addFrame;
     window.deleteFrame = deleteFrame;
     window.undoLastChange = undoLastChange;
-    // In main.js, add this to the DOM loaded event handler
-    window.fetchMapData = fetchMapData;
 
     console.log('App initialized, all functions exposed to global scope');
 });
