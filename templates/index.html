@@ -31,6 +31,17 @@
             <label for="duration">Duration (minutes):</label>
             <input type="number" id="duration" value="1">
         </div>
+
+        <!-- New Date/Time Picker -->
+        <div class="form-group">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date">
+        </div>
+        <div class="form-group">
+            <label for="start-time">Start Time:</label>
+            <input type="time" id="start-time">
+        </div>
+
         <button class="button" onclick="initializeScene()">Initialize Scene</button>
         <div id="init-status"></div>
     </div>
@@ -94,7 +105,11 @@
         <span>Timeline:</span>
         <span id="current-time">00:00:00</span>
     </div>
-    <input type="range" id="timeline-slider" min="0" max="3600" value="0" step="1">
+    <div class="timeline-slider-container">
+        <button class="button small" onclick="skipTimeline(-10)">◀ 10s</button>
+        <input type="range" id="timeline-slider" min="0" max="3600" value="0" step="1">
+        <button class="button small" onclick="skipTimeline(10)">10s ▶</button>
+    </div>
     <div class="timeline-controls">
         <button class="button" onclick="playPause()">Play</button>
         <button class="button" onclick="resetTimeline()">Reset</button>

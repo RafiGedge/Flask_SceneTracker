@@ -139,6 +139,26 @@ input[type="file"] {
     margin-top: 10px;
 }
 
+.timeline-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.timeline-slider-container input[type="range"] {
+    flex: 1;
+}
+
+.button.small {
+    padding: 4px 8px;
+    font-size: 12px;
+    min-width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #current-time {
     font-weight: bold;
     margin-left: 10px;
@@ -276,4 +296,20 @@ input[type="file"] {
     .object-type-tabs {
         font-size: 11px;
     }
+}
+
+input[type="date"],
+input[type="time"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+}
+
+/* Make sure the calendar and time picker icons are visible */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    opacity: 1;
+    cursor: pointer;
 }
