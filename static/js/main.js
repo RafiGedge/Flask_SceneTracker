@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup object type tabs
     setupObjectTypeTabs();
     
+    // Initialize keyboard controls for timeline
+    initTimelineKeyboardControls();
+    
     // Make functions available globally
     window.createNewScene = createNewScene;
     window.initializeScene = initializeScene;

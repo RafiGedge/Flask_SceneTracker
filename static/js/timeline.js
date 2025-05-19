@@ -50,14 +50,20 @@ function skipTimeline(secondsToSkip) {
 }
 
 // Play/pause timeline with corrected speed calculation
-function playPause() {
+function playPause(e) {
+    // If event is provided, prevent default (important for space key)
+    if (e && e.preventDefault) {
+        e.preventDefault();
+    }
+    
     // Stop any existing playback
     if (playInterval) {
         clearInterval(playInterval);
         playInterval = null;
     }
     
-    const button = event.target;
+    // Get the play button (might be triggered from keyboard)
+    const button = document.getElementById('play-pause-btn');
     
     if (isPlaying) {
         button.textContent = 'Play';
@@ -117,7 +123,7 @@ function playPause() {
 function resetTimeline() {
     // Stop playback first
     if (isPlaying) {
-        const playButton = document.querySelector('#timeline-container .button');
+        const playButton = document.getElementById('play-pause-btn');
         if (playButton) {
             playButton.click(); // This will stop playback
         }
@@ -127,4 +133,24 @@ function resetTimeline() {
     slider.value = 0;
     updateTimeline();
     console.log('Timeline reset to 0');
+}
+
+// Initialize keyboard event listener for space bar 
+function initTimelineKeyboardControls() {
+    // Add keyboard event listener to the document for space bar
+    document.addEventListener('keydown', function(e) {
+        // Check if space bar was pressed (key code 32)
+        if (e.keyCode === 32 || e.key === ' ') {
+            // Only trigger if we have a scene and not in a text input field
+            if (hasExistingScene && 
+                document.activeElement.tagName !== 'INPUT' && 
+                document.activeElement.tagName !== 'TEXTAREA' &&
+                document.activeElement.tagName !== 'SELECT') {
+                // Trigger play/pause with the event
+                playPause(e);
+            }
+        }
+    });
+    
+    console.log('Timeline keyboard controls initialized');
 }
