@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addFrame = addFrame;
     window.deleteFrame = deleteFrame;
     window.undoLastChange = undoLastChange;
+    window.showEditSceneModal = showEditSceneModal;
+    window.closeEditSceneModal = closeEditSceneModal;
+    window.updateSceneDetails = updateSceneDetails;
 
     console.log('App initialized, all functions exposed to global scope');
 });

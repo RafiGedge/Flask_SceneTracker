@@ -216,6 +216,15 @@ function closeLoadModal() {
     clearStatus('load-status');
 }
 
+// Initialize after loading
+function initializeAfterLoad() {
+    // Show the Edit Scene button
+    document.getElementById('edit-scene-btn').style.display = 'inline-block';
+    
+    // Other initialization tasks can be added here
+    console.log("Scene loaded and initialized");
+}
+
 // Load selected ZIP file with better error handling
 async function loadSelectedFile() {
     const zipInput = document.getElementById('zip-file-input');
@@ -350,6 +359,10 @@ async function loadSelectedFile() {
         
         showStatus('load-status', 'Scene loaded successfully!', 'success');
         console.log("Scene loaded successfully");
+        
+        // Initialize after loading - show Edit Scene button
+        initializeAfterLoad();
+        
         setTimeout(() => {
             closeLoadModal();
         }, 1500);

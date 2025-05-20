@@ -56,6 +56,12 @@ function playPause(e) {
         e.preventDefault();
     }
     
+    // Don't do anything if no scene exists
+    if (!hasExistingScene) {
+        console.log('No scene to play/pause');
+        return;
+    }
+    
     // Stop any existing playback
     if (playInterval) {
         clearInterval(playInterval);

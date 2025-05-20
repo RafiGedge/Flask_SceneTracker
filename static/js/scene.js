@@ -55,6 +55,7 @@ function clearExistingScene() {
     document.getElementById('scene-info').textContent = 'Create a new scene to get started';
     document.getElementById('delete-btn').style.display = 'none';
     document.getElementById('frame-management').style.display = 'none';
+    document.getElementById('edit-scene-btn').style.display = 'none';
     updateObjectsList();
 }
 
@@ -89,6 +90,7 @@ function setupMapAndScene(centerLat, centerLon, radius, duration) {
         currentTimestamp = 0;
 
         document.getElementById('scene-info').textContent = `Scene: ${scene.scene_name} | Duration: ${duration} min`;
+        document.getElementById('edit-scene-btn').style.display = 'inline-block';
 
         hasExistingScene = true;
         map.on('click', handleMapClick);
@@ -156,6 +158,148 @@ async function initializeScene() {
             document.getElementById('setup-modal').classList.add('hidden');
         }, 1500);
 
+    } catch (error) {
+        statusDiv.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+    }
+}
+
+// Show edit scene modal
+function showEditSceneModal() {
+    if (!hasExistingScene) {
+        alert('No scene to edit. Please create or load a scene first.');
+        return;
+    }
+
+    // Populate the form with current scene values
+    document.getElementById('edit-scene-name').value = scene.scene_name || '';
+    document.getElementById('edit-radius').value = scene.radius_meters || 200;
+
+    // Calculate duration in minutes
+    const durationMinutes = scene.end_timestamp && scene.start_timestamp ? 
+        Math.floor((scene.end_timestamp - scene.start_timestamp) / 60) : 60;
+    document.getElementById('edit-duration').value = durationMinutes;
+
+    // Convert timestamp to date and time for the date/time pickers
+    if (scene.start_timestamp) {
+        const startDate = new Date(scene.start_timestamp * 1000);
+        
+        // Format date as YYYY-MM-DD
+        const year = startDate.getFullYear();
+        const month = (startDate.getMonth() + 1).toString().padStart(2, '0');
+        const day = startDate.getDate().toString().padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        
+        // Format time as HH:MM
+        const hours = startDate.getHours().toString().padStart(2, '0');
+        const minutes = startDate.getMinutes().toString().padStart(2, '0');
+        const formattedTime = `${hours}:${minutes}`;
+        
+        document.getElementById('edit-start-date').value = formattedDate;
+        document.getElementById('edit-start-time').value = formattedTime;
+    }
+
+    // Show the modal
+    document.getElementById('edit-scene-modal').classList.remove('hidden');
+}
+
+// Close edit scene modal
+function closeEditSceneModal() {
+    document.getElementById('edit-scene-modal').classList.add('hidden');
+    document.getElementById('edit-scene-status').innerHTML = '';
+}
+
+// Update scene details
+function updateSceneDetails() {
+    if (!hasExistingScene) {
+        alert('No scene to update. Please create or load a scene first.');
+        return;
+    }
+    
+    const statusDiv = document.getElementById('edit-scene-status');
+    statusDiv.innerHTML = '<div class="loading">Updating scene...</div>';
+    
+    try {
+        // Get values from form
+        const newSceneName = document.getElementById('edit-scene-name').value;
+        const newRadius = parseInt(document.getElementById('edit-radius').value);
+        const newDuration = parseInt(document.getElementById('edit-duration').value);
+        const newStartDate = document.getElementById('edit-start-date').value;
+        const newStartTime = document.getElementById('edit-start-time').value;
+        
+        // Validate inputs
+        if (!newSceneName || !newRadius || !newDuration) {
+            throw new Error('Please fill in all required fields');
+        }
+        
+        if (newRadius <= 0) {
+            throw new Error('Radius must be greater than 0');
+        }
+        
+        if (newDuration <= 0) {
+            throw new Error('Duration must be greater than 0');
+        }
+        
+        // Calculate new start timestamp
+        let newStartTimestamp;
+        if (newStartDate && newStartTime) {
+            const dateTimeString = `${newStartDate}T${newStartTime}:00`;
+            const selectedDateTime = new Date(dateTimeString);
+            if (isNaN(selectedDateTime.getTime())) {
+                throw new Error('Invalid date or time format');
+            }
+            newStartTimestamp = Math.floor(selectedDateTime.getTime() / 1000);
+        } else {
+            // Keep current timestamp if date/time not provided
+            newStartTimestamp = scene.start_timestamp;
+        }
+        
+        // Calculate time difference between old and new start time
+        const timeShift = newStartTimestamp - scene.start_timestamp;
+        
+        // Update scene properties
+        scene.scene_name = newSceneName;
+        scene.radius_meters = newRadius;
+        scene.start_timestamp = newStartTimestamp;
+        scene.end_timestamp = newStartTimestamp + (newDuration * 60);
+        
+        // Adjust all timestamps in objects if start time changed
+        if (timeShift !== 0) {
+            // Adjust all object timestamps
+            for (const objectType in objects) {
+                for (const objectId in objects[objectType]) {
+                    const obj = objects[objectType][objectId];
+                    
+                    // Adjust timestamp property if it exists
+                    if (obj.timestamp) {
+                        obj.timestamp += timeShift;
+                    }
+                    
+                    // Adjust creation_time for Targets
+                    if (objectType === 'Targets' && obj.creation_time) {
+                        obj.creation_time += timeShift;
+                    }
+                    
+                    // Adjust frames if they exist
+                    if (obj.frames) {
+                        obj.frames.forEach(frame => {
+                            if (frame.timestamp) {
+                                frame.timestamp += timeShift;
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        
+        // Update map and timeline
+        setupMapAndScene(scene.center_lat, scene.center_lon, newRadius, newDuration);
+        
+        statusDiv.innerHTML = '<div class="success-message">Scene updated successfully!</div>';
+        
+        setTimeout(() => {
+            closeEditSceneModal();
+        }, 1500);
+        
     } catch (error) {
         statusDiv.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
     }

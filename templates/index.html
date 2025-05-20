@@ -6,7 +6,6 @@
     <title>GIS Timeline Tracker - Professional Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.png">
 </head>
 <body>
 <div id="setup-modal" class="hidden">
@@ -53,6 +52,7 @@
     <button class="button" onclick="saveScene()">Save Scene</button>
     <button class="button" onclick="downloadScene()">Download ZIP</button>
     <button class="button" onclick="showLoadOptions()">Load Scene</button>
+    <button class="button" onclick="showEditSceneModal()" id="edit-scene-btn">Edit Scene</button>
     <button class="button danger" onclick="deleteObject()" style="display: none;" id="delete-btn">Delete Object</button>
     <span id="scene-info"></span>
 </div>
@@ -67,6 +67,37 @@
             <button class="button secondary" onclick="closeLoadModal()">Cancel</button>
         </div>
         <div id="load-status"></div>
+    </div>
+</div>
+
+<div id="edit-scene-modal" class="hidden">
+    <div class="modal-content">
+        <h3>Edit Scene Details</h3>
+        <div class="form-group">
+            <label for="edit-scene-name">Scene Name:</label>
+            <input type="text" id="edit-scene-name">
+        </div>
+        <div class="form-group">
+            <label for="edit-radius">Radius (meters):</label>
+            <input type="number" id="edit-radius">
+        </div>
+        <div class="form-group">
+            <label for="edit-duration">Duration (minutes):</label>
+            <input type="number" id="edit-duration">
+        </div>
+        <div class="form-group">
+            <label for="edit-start-date">Start Date:</label>
+            <input type="date" id="edit-start-date">
+        </div>
+        <div class="form-group">
+            <label for="edit-start-time">Start Time:</label>
+            <input type="time" id="edit-start-time">
+        </div>
+        <div class="edit-scene-controls">
+            <button class="button" onclick="updateSceneDetails()">Save Changes</button>
+            <button class="button secondary" onclick="closeEditSceneModal()">Cancel</button>
+        </div>
+        <div id="edit-scene-status"></div>
     </div>
 </div>
 
