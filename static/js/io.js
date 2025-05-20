@@ -6,73 +6,73 @@ async function saveScene() {
         alert('Please initialize a scene first.');
         return;
     }
-
+    
     try {
         const zip = new JSZip();
         const folderName = scene.scene_name.replace(/[<>:"/\\|?*]/g, '_'); // Sanitize filename
         const folder = zip.folder(folderName);
-
+        
         // Save scene.json
         folder.file('scene.json', JSON.stringify(scene, null, 2));
-
+        
         // Save buildings.csv
         if (buildings.length > 0) {
             const buildingsCsv = buildingsToCSV();
             folder.file('buildings.csv', buildingsCsv);
         }
-
+        
         // Save roads.csv
         if (roads.length > 0) {
             const roadsCsv = roadsToCSV();
             folder.file('roads.csv', roadsCsv);
         }
-
+        
         // Save object type CSVs
         for (const [objectType, objectsOfType] of Object.entries(objects)) {
             if (Object.keys(objectsOfType).length === 0) continue;
             const csvData = objectsToCSV(objectsOfType, objectType);
             folder.file(`${objectType.toLowerCase()}.csv`, csvData);
         }
-
+        
         // Generate ZIP with proper options for Windows
-        const content = await zip.generateAsync({
+        const content = await zip.generateAsync({ 
             type: 'blob',
             compression: 'DEFLATE',
-            compressionOptions: {level: 6},
+            compressionOptions: { level: 6 },
             // Add metadata for better Windows compatibility
             comment: `GIS Timeline Scene: ${folderName}`,
             platform: 'UNIX' // Better compatibility
         });
-
+        
         // Create download with proper MIME type and attributes
         const timestamp = new Date().toISOString().split('T')[0];
         const filename = `${folderName}_${timestamp}.zip`;
-
+        
         // Method 1: Direct blob download with proper headers
-        const url = URL.createObjectURL(new Blob([content], {
+        const url = URL.createObjectURL(new Blob([content], { 
             type: 'application/zip'
         }));
-
+        
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         a.style.display = 'none';
         a.setAttribute('download', filename); // Force download
         a.setAttribute('type', 'application/zip');
-
+        
         // Add to DOM, click, and remove
         document.body.appendChild(a);
         a.click();
-
+        
         // Clean up after a short delay
         setTimeout(() => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }, 100);
-
+        
         // Optional: Show success message
         console.log(`Scene saved as ${filename}`);
-
+        
     } catch (error) {
         console.error('Error saving scene:', error);
         alert(`Error saving scene: ${error.message}`);
@@ -85,27 +85,27 @@ async function saveSceneAlternative() {
         alert('Please initialize a scene first.');
         return;
     }
-
+    
     try {
         const zip = new JSZip();
         const folderName = scene.scene_name.replace(/[<>:"/\\|?*]/g, '_');
         const folder = zip.folder(folderName);
-
+        
         // Add all files as before...
         folder.file('scene.json', JSON.stringify(scene, null, 2));
         // ... (other files)
-
-        const content = await zip.generateAsync({type: 'base64'});
-
+        
+        const content = await zip.generateAsync({ type: 'base64' });
+        
         // Create data URL
         const dataUrl = `data:application/zip;base64,${content}`;
-
+        
         // Force download
         const link = document.createElement('a');
         link.href = dataUrl;
         link.download = `${folderName}_${new Date().toISOString().split('T')[0]}.zip`;
         link.click();
-
+        
     } catch (error) {
         console.error('Error saving scene:', error);
         alert(`Error saving scene: ${error.message}`);
@@ -139,7 +139,7 @@ function objectsToCSV(objects, type) {
     if (Object.keys(objects).length === 0) return '';
     const headers = getCSVHeaders(type);
     let csv = headers.join(',') + '\n';
-
+    
     // Special handling for Shooting objects
     if (type === 'Shooting') {
         for (const obj of Object.values(objects)) {
@@ -155,7 +155,7 @@ function objectsToCSV(objects, type) {
         }
         return csv;
     }
-
+    
     // For other objects with frames
     for (const obj of Object.values(objects)) {
         // For objects with frames, create a row for each frame
@@ -167,7 +167,7 @@ function objectsToCSV(objects, type) {
                     else if (header === 'y') value = frame.y;
                     else if (header === 'timestamp') value = frame.timestamp;
                     else value = obj[header];
-
+                    
                     if (value === undefined || value === null) return '';
                     if (typeof value === 'string' && value.includes(',')) {
                         return `"${value.replace(/"/g, '""')}"`;
@@ -195,20 +195,13 @@ function objectsToCSV(objects, type) {
 // Get CSV headers for object type - Simplified for Shooting objects
 function getCSVHeaders(type) {
     switch (type) {
-        case 'Ground':
-            return ['id', 'type', 'callsign', 'x', 'y', 'timestamp'];
-        case 'Shooting':
-            return ['id', 'associated_ground_id', 'ground_callsign', 'timestamp', 'launch_location_x', 'launch_location_y', 'target_x', 'target_y', 'ammo_type'];
-        case 'EnemySpot':
-            return ['id', 'timestamp', 'x', 'y', 'desc', 'callsign', 'associated_ground_id', 'ground_callsign'];
-        case 'Report':
-            return ['id', 'timestamp', 'x', 'y', 'desc', 'callsign', 'associated_ground_id', 'ground_callsign'];
-        case 'Targets':
-            return ['id', 'creation_time', 'x', 'y', 'target_type'];
-        case 'EnemyInfrastructure':
-            return ['id', 'type', 'x', 'y', 'timestamp'];
-        default:
-            return [];
+        case 'Ground': return ['id', 'type', 'callsign', 'x', 'y', 'timestamp'];
+        case 'Shooting': return ['id', 'associated_ground_id', 'ground_callsign', 'timestamp', 'launch_location_x', 'launch_location_y', 'target_x', 'target_y', 'ammo_type'];
+        case 'EnemySpot': return ['id', 'timestamp', 'x', 'y', 'desc', 'callsign', 'associated_ground_id', 'ground_callsign'];
+        case 'Report': return ['id', 'timestamp', 'x', 'y', 'desc', 'callsign', 'associated_ground_id', 'ground_callsign'];
+        case 'Targets': return ['id', 'creation_time', 'x', 'y', 'target_type'];
+        case 'EnemyInfrastructure': return ['id', 'type', 'x', 'y', 'timestamp'];
+        default: return [];
     }
 }
 
@@ -230,28 +223,28 @@ async function loadSelectedFile() {
         showStatus('load-status', 'Please select a ZIP file to load.', 'error');
         return;
     }
-
+    
     showStatus('load-status', 'Loading scene...', 'loading');
-
+    
     try {
         const file = zipInput.files[0];
-
+        
         // Validate file type
         if (!file.name.toLowerCase().endsWith('.zip')) {
             throw new Error('Please select a ZIP file.');
         }
-
+        
         console.log("Loading ZIP file:", file.name);
-
+        
         const zip = new JSZip();
         const content = await zip.loadAsync(file);
-
+        
         console.log("ZIP file loaded, files:", Object.keys(content.files).join(", "));
-
+        
         // Find scene.json (could be in root or subfolder)
         let sceneFile = null;
         let sceneFolder = null;
-
+        
         for (const fileName of Object.keys(content.files)) {
             if (fileName.endsWith('scene.json') && !content.files[fileName].dir) {
                 sceneFile = content.files[fileName];
@@ -262,45 +255,45 @@ async function loadSelectedFile() {
                 break;
             }
         }
-
+        
         if (!sceneFile) {
             throw new Error('scene.json not found in the ZIP file.');
         }
-
+        
         console.log("Found scene.json:", sceneFile.name);
-
+        
         // Load scene.json
         const sceneContent = await sceneFile.async('string');
         scene = JSON.parse(sceneContent);
-
+        
         // Validate scene data
         if (!scene.scene_name || !scene.center_lat || !scene.center_lon) {
             throw new Error('Invalid scene.json format.');
         }
-
+        
         console.log("Scene data loaded:", scene.scene_name);
-
+        
         // Load building and road data
         buildings = [];
         roads = [];
-
+        
         const buildingsFile = content.files[(sceneFolder || '') + 'buildings.csv'];
         if (buildingsFile && !buildingsFile.dir) {
             const buildingsCsv = await buildingsFile.async('string');
             buildings = parseBuildingsCSV(buildingsCsv);
             console.log(`Loaded ${buildings.length} buildings`);
         }
-
+        
         const roadsFile = content.files[(sceneFolder || '') + 'roads.csv'];
         if (roadsFile && !roadsFile.dir) {
             const roadsCsv = await roadsFile.async('string');
             roads = parseRoadsCSV(roadsCsv);
             console.log(`Loaded ${roads.length} roads`);
         }
-
+        
         // Load object data
         initializeObjects();
-
+        
         // Initialize first to make sure the objects property exists
         if (!objects) {
             console.error("Objects is undefined after initialization, recreating");
@@ -313,7 +306,7 @@ async function loadSelectedFile() {
                 EnemyInfrastructure: {}
             };
         }
-
+        
         // Load each object type
         const objectTypes = ['Ground', 'Shooting', 'EnemySpot', 'Report', 'Targets', 'EnemyInfrastructure'];
         for (const objectType of objectTypes) {
@@ -323,14 +316,16 @@ async function loadSelectedFile() {
                 try {
                     const csvContent = await file.async('string');
                     console.log(`Loading ${objectType} data from ${fileName}, csv length: ${csvContent.length} bytes`);
-
-                    // Special handling for Shooting objects since they don't have frames
+                    
+                    // Special handling for specific object types
                     if (objectType === 'Shooting') {
                         objects[objectType] = parseShootingCSV(csvContent);
+                    } else if (objectType === 'Targets') {
+                        objects[objectType] = parseTargetsCSV(csvContent);
                     } else {
                         objects[objectType] = parseObjectCSV(csvContent, objectType);
                     }
-
+                    
                     console.log(`Loaded ${Object.keys(objects[objectType]).length} ${objectType} objects`);
                 } catch (e) {
                     console.error(`Error loading ${objectType} data:`, e);
@@ -340,25 +335,25 @@ async function loadSelectedFile() {
                 objects[objectType] = {}; // Initialize to empty if file not found
             }
         }
-
+        
         // Setup scene
         const duration = (scene.end_timestamp - scene.start_timestamp) / 60;
         console.log("Setting up map with duration:", duration);
         setupMapAndScene(scene.center_lat, scene.center_lon, scene.radius_meters, duration);
-
+        
         // Update timeline
         currentTimestamp = 0;
         const timelineSlider = document.getElementById('timeline-slider');
         timelineSlider.value = 0;
         console.log("Updating timeline");
         updateTimeline();
-
+        
         showStatus('load-status', 'Scene loaded successfully!', 'success');
         console.log("Scene loaded successfully");
         setTimeout(() => {
             closeLoadModal();
         }, 1500);
-
+        
     } catch (error) {
         console.error('Load error:', error);
         showStatus('load-status', `Error loading file: ${error.message}`, 'error');
@@ -370,10 +365,10 @@ function parseShootingCSV(csv) {
     try {
         const lines = csv.split('\n').filter(line => line.trim());
         if (lines.length <= 1) return {};
-
+        
         const headers = parseCSVLine(lines[0]);
         const objects = {};
-
+        
         for (let i = 1; i < lines.length; i++) {
             try {
                 const parts = parseCSVLine(lines[i]);
@@ -381,9 +376,9 @@ function parseShootingCSV(csv) {
                     console.warn(`Line ${i} has fewer elements than headers: ${parts.length} vs ${headers.length}`);
                     continue;
                 }
-
+                
                 const obj = {};
-
+                
                 // Set default values for required fields
                 obj.target_x = 0;
                 obj.target_y = 0;
@@ -392,12 +387,12 @@ function parseShootingCSV(csv) {
                 obj.ammo_type = 'standard';
                 obj.associated_ground_id = null;
                 obj.ground_callsign = '';
-                obj.timestamp = 0;
-
+                obj.timestamp = scene.start_timestamp; // Default to scene start time if not specified
+                
                 // Parse values from CSV
                 headers.forEach((header, index) => {
                     let value = parts[index] || '';
-
+                    
                     // Convert numeric fields
                     if (value && (header.includes('_time') || header === 'timestamp')) {
                         value = parseInt(value);
@@ -406,28 +401,34 @@ function parseShootingCSV(csv) {
                             value = parseFloat(value);
                         }
                     }
-
+                    
                     obj[header] = value;
                 });
-
+                
+                // Ensure timestamp is valid
+                if (!obj.timestamp || obj.timestamp < scene.start_timestamp) {
+                    console.warn(`Shooting object has invalid timestamp, setting to scene start time:`, obj);
+                    obj.timestamp = scene.start_timestamp;
+                }
+                
                 // Get ID from the CSV data or generate one
                 const objId = obj.id || generateUUID();
-
+                
                 // Ensure obj has no frames property
                 if (obj.frames) delete obj.frames;
-
+                
                 // Handle backward compatibility with older saved files
                 // If we have original_ground_x/y but no launch_location_x/y
-                if (obj.original_ground_x && obj.original_ground_y &&
+                if (obj.original_ground_x && obj.original_ground_y && 
                     (!obj.launch_location_x || obj.launch_location_x === 'None')) {
                     obj.launch_location_x = obj.original_ground_x;
                     obj.launch_location_y = obj.original_ground_y;
                 }
-
+                
                 // Remove deprecated fields
                 if (obj.original_ground_x) delete obj.original_ground_x;
                 if (obj.original_ground_y) delete obj.original_ground_y;
-
+                
                 // Ensure target_x and target_y are numbers
                 if (obj.target_x && typeof obj.target_x === 'string') {
                     obj.target_x = parseFloat(obj.target_x);
@@ -435,19 +436,96 @@ function parseShootingCSV(csv) {
                 if (obj.target_y && typeof obj.target_y === 'string') {
                     obj.target_y = parseFloat(obj.target_y);
                 }
-
+                
                 // Save the object
                 objects[objId] = obj;
-
-                console.log(`Loaded Shooting object: ${objId}`, objects[objId]);
+                
+                console.log(`Loaded Shooting object: ${objId} with timestamp ${new Date(obj.timestamp * 1000).toLocaleString()}`, objects[objId]);
             } catch (e) {
                 console.warn(`Error parsing Shooting CSV line:`, lines[i], e);
             }
         }
-
+        
         return objects;
     } catch (error) {
         console.error("Error in parseShootingCSV:", error);
+        return {}; // Return empty object in case of error
+    }
+}
+
+// Parse Target objects CSV - special handling like Shooting objects
+function parseTargetsCSV(csv) {
+    try {
+        const lines = csv.split('\n').filter(line => line.trim());
+        if (lines.length <= 1) return {};
+        
+        const headers = parseCSVLine(lines[0]);
+        const objects = {};
+        
+        for (let i = 1; i < lines.length; i++) {
+            try {
+                const parts = parseCSVLine(lines[i]);
+                if (parts.length < headers.length) {
+                    console.warn(`Line ${i} has fewer elements than headers: ${parts.length} vs ${headers.length}`);
+                    continue;
+                }
+                
+                const obj = {};
+                
+                // Set default values for required fields
+                obj.x = 0;
+                obj.y = 0;
+                obj.target_type = 'unknown';
+                obj.creation_time = scene.start_timestamp; // Default to scene start time if not specified
+                
+                // Parse values from CSV
+                headers.forEach((header, index) => {
+                    let value = parts[index] || '';
+                    
+                    // Convert numeric fields
+                    if (value && (header.includes('_time') || header === 'creation_time')) {
+                        value = parseInt(value);
+                    } else if (value && (header === 'x' || header === 'y')) {
+                        value = parseFloat(value);
+                    }
+                    
+                    obj[header] = value;
+                });
+                
+                // Ensure creation_time is valid
+                if (!obj.creation_time || obj.creation_time < scene.start_timestamp) {
+                    console.warn(`Target object has invalid creation_time, setting to scene start time:`, obj);
+                    obj.creation_time = scene.start_timestamp;
+                }
+                
+                // Get ID from the CSV data or generate one
+                const objId = obj.id || generateUUID();
+                
+                // Ensure target_type is set
+                if (!obj.target_type) {
+                    obj.target_type = 'unknown';
+                }
+                
+                // Ensure x and y are numbers
+                if (obj.x && typeof obj.x === 'string') {
+                    obj.x = parseFloat(obj.x);
+                }
+                if (obj.y && typeof obj.y === 'string') {
+                    obj.y = parseFloat(obj.y);
+                }
+                
+                // Save the object
+                objects[objId] = obj;
+                
+                console.log(`Loaded Target object: ${objId} with creation_time ${new Date(obj.creation_time * 1000).toLocaleString()}`, objects[objId]);
+            } catch (e) {
+                console.warn(`Error parsing Target CSV line:`, lines[i], e);
+            }
+        }
+        
+        return objects;
+    } catch (error) {
+        console.error("Error in parseTargetsCSV:", error);
         return {}; // Return empty object in case of error
     }
 }
@@ -456,7 +534,7 @@ function parseShootingCSV(csv) {
 function parseBuildingsCSV(csv) {
     const lines = csv.split('\n').filter(line => line.trim());
     if (lines.length <= 1) return [];
-
+    
     const buildings = [];
     for (let i = 1; i < lines.length; i++) {
         try {
@@ -479,7 +557,7 @@ function parseBuildingsCSV(csv) {
 function parseRoadsCSV(csv) {
     const lines = csv.split('\n').filter(line => line.trim());
     if (lines.length <= 1) return [];
-
+    
     const roads = [];
     for (let i = 1; i < lines.length; i++) {
         try {
@@ -502,15 +580,15 @@ function parseRoadsCSV(csv) {
 function parseObjectCSV(csv, objectType) {
     const lines = csv.split('\n').filter(line => line.trim());
     if (lines.length <= 1) return {};
-
+    
     const headers = parseCSVLine(lines[0]);
     const objects = {};
-
+    
     for (let i = 1; i < lines.length; i++) {
         try {
             const parts = parseCSVLine(lines[i]);
             const obj = {};
-
+            
             headers.forEach((header, index) => {
                 let value = parts[index] || '';
                 // Convert numeric fields
@@ -521,13 +599,13 @@ function parseObjectCSV(csv, objectType) {
                 }
                 obj[header] = value;
             });
-
+            
             // Get ID from the CSV data or generate one
             const objId = obj.id || generateUUID();
-
+            
             // Group frames by object ID
             if (!objects[objId]) {
-                objects[objId] = {...obj};
+                objects[objId] = { ...obj };
                 objects[objId].frames = [];
                 // Remove frame-specific data from the main object
                 if (objectType !== 'Targets') {
@@ -536,20 +614,20 @@ function parseObjectCSV(csv, objectType) {
                     delete objects[objId].timestamp;
                 }
             }
-
+            
             // Add frame data for objects that have timeline data
             if (objectType !== 'Targets' && obj.x !== undefined && obj.y !== undefined && obj.timestamp) {
                 if (!objects[objId].frames) {
                     objects[objId].frames = [];
                 }
-
+                
                 objects[objId].frames.push({
                     x: obj.x,
                     y: obj.y,
                     timestamp: obj.timestamp
                 });
             }
-
+            
             // For Targets, use creation_time instead of timestamp
             if (objectType === 'Targets' && obj.creation_time) {
                 objects[objId].creation_time = obj.creation_time;
@@ -560,7 +638,7 @@ function parseObjectCSV(csv, objectType) {
             console.warn(`Error parsing ${objectType} CSV line:`, lines[i], e);
         }
     }
-
+    
     return objects;
 }
 
@@ -569,10 +647,10 @@ function parseCSVLine(line) {
     const result = [];
     let current = '';
     let inQuotes = false;
-
+    
     for (let i = 0; i < line.length; i++) {
         const char = line[i];
-
+        
         if (char === '"') {
             if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
                 // Handle escaped quotes
@@ -588,7 +666,7 @@ function parseCSVLine(line) {
             current += char;
         }
     }
-
+    
     result.push(current);
     return result;
 }
@@ -597,3 +675,6 @@ function parseCSVLine(line) {
 async function downloadScene() {
     await saveScene();
 }
+
+// Make the new parseTargetsCSV function available
+window.parseTargetsCSV = parseTargetsCSV;
